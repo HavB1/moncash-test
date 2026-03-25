@@ -19,7 +19,7 @@ export async function POST(request) {
     if (!amount || amount <= 0) {
       return Response.json(
         { error: "Amount must be a positive number" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -34,13 +34,17 @@ export async function POST(request) {
     // Wrap the callback-based SDK in a Promise
     const result = await new Promise((resolve, reject) => {
       const paymentCreator = moncash.payment;
+      console.log("paymentData", paymentData);
+      console.log("paymentCreator", paymentCreator);
 
       paymentCreator.create(paymentData, function (error, payment) {
         if (error) {
+          console.error("MonCash SDK error:", error);
           reject(error);
         } else {
           // Get the redirect URI from the SDK
           const redirectUri = paymentCreator.redirect_uri(payment);
+          console.log("MonCash payment created:", payment);
           resolve({
             orderId: orderId,
             redirectUrl: redirectUri,
@@ -55,7 +59,7 @@ export async function POST(request) {
     console.error("MonCash payment creation error:", error);
     return Response.json(
       { error: "Failed to create payment. Check your MonCash credentials." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
